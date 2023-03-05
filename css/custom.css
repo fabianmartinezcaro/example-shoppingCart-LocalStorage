@@ -51,6 +51,12 @@ ul {
 .submenu #carrito{
     display: none;
 }
+
+.total-precio{
+    font-weight: bold;
+    font-size: 20px;
+}
+
 .submenu:hover #carrito{
     display: block;
     position: absolute;

@@ -1,4 +1,5 @@
 // Variables del carrito
+const totalPrecio = document.querySelector('#total-precio')
 const carrito = document.querySelector("#carrito");
 const contenedorCarrito = document.querySelector("#lista-carrito tbody");
 const vaciarCarrito = document.querySelector("#vaciar-carrito");
@@ -17,10 +18,13 @@ function cargarAddEventListeners(){
     carrito.addEventListener("click", eliminarCurso);
     vaciarCarrito.addEventListener("click", () => {
         articulosCarrito = [];
+        precioTotal();
+        console.log(articulosCarrito)
         limpiarHTML();
     })
 
     document.addEventListener('DOMContentLoaded',() => {
+        precioTotal();
         articulosCarrito = JSON.parse(localStorage.getItem('articulo')) || [];
         console.log(articulosCarrito);
         carritoHTML();
@@ -35,6 +39,7 @@ function agregarCurso(curso){
 	if(curso.target.classList.contains("agregar-carrito")){
 		mostrarInfo(cursoSeleccionado);
 	}
+    precioTotal();
 }
 
 // Eliminamos un curso
@@ -46,6 +51,24 @@ function eliminarCurso(e) {
         console.log(articulosCarrito);
         carritoHTML();
     }
+}
+
+// Calcular precio total del carro
+function precioTotal(){
+
+    // Suma el total del carrito
+    const totalPrecioCursos = articulosCarrito.reduce((acumulador, articulo) => {
+        const price = parseInt(articulo.precioCurso.replace('$', ''));
+        return acumulador + price;
+    }, 0);
+
+    console.log(totalPrecioCursos);
+
+    // Renderizamos el total en el HTML
+    const precioTotalHTML = document.createElement('p');
+    precioTotalHTML.textContent = `Precio total:${totalPrecioCursos}`;
+    totalPrecio.appendChild(precioTotalHTML);
+    
 }
 
 // Extrae y muestra la información del curso
@@ -68,6 +91,7 @@ function mostrarInfo(curso){
         const cursos = articulosCarrito.map(curso => {
             if(curso.id === infoCurso.id){
                 curso.cantidad++;
+                curso.precioCurso = (parseInt(curso.precioCurso.replace('$', '')) * curso.cantidad).toString();
                 return curso;
             }else{
                 return curso;
@@ -121,6 +145,10 @@ function limpiarHTML(){
     // Forma eficiente de renderizar sin que se dupliquen los elementos del primer renderizado.
     while(contenedorCarrito.firstChild){
         contenedorCarrito.removeChild(contenedorCarrito.firstChild);
+    }
+
+    while(totalPrecio.firstChild){
+        totalPrecio.removeChild(totalPrecio.firstChild);
     }
 
 }
