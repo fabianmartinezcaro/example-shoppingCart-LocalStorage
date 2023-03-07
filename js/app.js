@@ -1,5 +1,5 @@
 // Variables del carrito
-const totalPrecio = document.querySelector('#total-precio')
+const totalPrecio = document.querySelector('#precio-total-carro')
 const carrito = document.querySelector("#carrito");
 const contenedorCarrito = document.querySelector("#lista-carrito tbody");
 const vaciarCarrito = document.querySelector("#vaciar-carrito");
@@ -17,17 +17,19 @@ function cargarAddEventListeners(){
 
     carrito.addEventListener("click", eliminarCurso);
     vaciarCarrito.addEventListener("click", () => {
+        mostrarPrecioTotal();
         articulosCarrito = [];
-        precioTotal();
         console.log(articulosCarrito)
+        carritoHTML();
         limpiarHTML();
+        
     })
 
     document.addEventListener('DOMContentLoaded',() => {
-        precioTotal();
         articulosCarrito = JSON.parse(localStorage.getItem('articulo')) || [];
         console.log(articulosCarrito);
         carritoHTML();
+        mostrarPrecioTotal()
     })
 }
 
@@ -39,7 +41,7 @@ function agregarCurso(curso){
 	if(curso.target.classList.contains("agregar-carrito")){
 		mostrarInfo(cursoSeleccionado);
 	}
-    precioTotal();
+    mostrarPrecioTotal();
 }
 
 // Eliminamos un curso
@@ -53,22 +55,20 @@ function eliminarCurso(e) {
     }
 }
 
-// Calcular precio total del carro
-function precioTotal(){
+function mostrarPrecioTotal(){
+    const reducePrecioTotal  = articulosCarrito.reduce((acumulador, articulo) => {
+        const precio = parseInt(articulo.precioCurso.replace('$', ''));
+        const cantidad = articulo.cantidad;
+        return acumulador + (precio * cantidad);
+    }, 0)
 
-    // Suma el total del carrito
-    const totalPrecioCursos = articulosCarrito.reduce((acumulador, articulo) => {
-        const price = parseInt(articulo.precioCurso.replace('$', ''));
-        return acumulador + price;
-    }, 0);
+    console.log(reducePrecioTotal)
 
-    console.log(totalPrecioCursos);
+    const precioTotalHTML = document.createElement('P');
+    precioTotalHTML.classList.add('precio-total-carro');
+    precioTotalHTML.textContent = `Precio total: $ ${reducePrecioTotal}`;
 
-    // Renderizamos el total en el HTML
-    const precioTotalHTML = document.createElement('p');
-    precioTotalHTML.textContent = `Precio total:${totalPrecioCursos}`;
     totalPrecio.appendChild(precioTotalHTML);
-    
 }
 
 // Extrae y muestra la información del curso
@@ -91,7 +91,6 @@ function mostrarInfo(curso){
         const cursos = articulosCarrito.map(curso => {
             if(curso.id === infoCurso.id){
                 curso.cantidad++;
-                curso.precioCurso = (parseInt(curso.precioCurso.replace('$', '')) * curso.cantidad).toString();
                 return curso;
             }else{
                 return curso;
@@ -123,7 +122,7 @@ function carritoHTML () {
         row.innerHTML = `
             <td><img src="${imagen}" width=100></td>
             <td>${nombreCurso}</td>
-            <td>${precioCurso}</td>
+            <td>$ ${precioCurso.replace('$','')}</td>
             <td>${cantidad}</td>
             <td> 
                 <a href="#" class="borrar-curso" data-id="${id}"> X </a>
@@ -131,6 +130,7 @@ function carritoHTML () {
         `;
         // Agrega el HTML del carrito en el tbody
         contenedorCarrito.appendChild(row); 
+
     })
 
     saveAtLocalStorage();
